@@ -13,22 +13,25 @@ class DocumentChunking:
         self.chunk_overlap = chunk_overlap
         pass
 
-    def directory_files_chunking(self, path) -> list[Document]:
+    def directory_files_chunking(self, path: str, split_text: bool = False) -> list[Document]:
         if not os.path.exists(path):
             raise Exception(f"{path} doesn't exist. Please recheck")
         loader = DirectoryLoader(path)
         documents = loader.load()
+        if not split_text:
+            return documents
         # text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=0, separator=". ")
         text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(chunk_size=self.chunk_size, chunk_overlap=self.chunk_overlap,
                                                                              encoding_name="cl100k_base")
         return text_splitter.split_documents(documents)
 
-    def single_file_chunking(self, path_to_file: str) -> list[Document]:
+    def single_file_chunking(self, path_to_file: str, split_text: bool = False) -> list[Document]:
         if not os.path.exists(path_to_file):
             raise Exception(f"{path_to_file} doesn't exist. Please check")
         loader = TextLoader(path_to_file)
         documents = loader.load()
-
+        if not split_text:
+            return documents
         text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(chunk_size=self.chunk_size, chunk_overlap=self.chunk_overlap,
                                                                              encoding_name="cl100k_base")
         return text_splitter.split_documents(documents)
