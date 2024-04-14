@@ -1,3 +1,7 @@
+import time
+
+import openai
+
 import constants
 
 from langchain_openai import OpenAIEmbeddings
@@ -18,22 +22,30 @@ class Index:
         self.embeddings = OpenAIEmbeddings()
 
     def create_index(self, document: list[Document], summarise=False):
+        max_retries = 5
         if summarise:
             # print(len(document))
-            document = Summariser().summarise(document)
-        try:
-            qdrant = Qdrant.from_documents(
-                document,
-                self.embeddings,
-                url=self.host_name,
-                prefer_grpc=True,
-                api_key=self.API,
-                collection_name=self.collection_name,
-            )
+            document = Summariser().summarise_using_openai(document)
+        while max_retries:
+            try:
+                qdrant = Qdrant.from_documents(
+                    document,
+                    self.embeddings,
+                    url=self.host_name,
+                    prefer_grpc=True,
+                    api_key=self.API,
+                    collection_name=self.collection_name,
+                )
+            except openai.RateLimitError as rate_limit_error:
+                max_retries -= 1
+                if max_retries == 0:
+                    raise IndexException('Unable to index. Rate limit error occurred. Retries exhausted')
+                log.exception('Rate limit error while converting text to embeddings : %s. Exception: %s', rate_limit_error)
+                time.sleep(60 * abs(3-max_retries))  # openai.RateLimitError on embedding is 20 seconds
 
-        except IndexException as e:
-            log.exception('IndexException occurred while creating index: %s', e)
-            raise IndexException()
+            except IndexException as e:
+                log.exception('IndexException occurred while creating index: %s', e)
+                raise IndexException('Error occurred while creating index: %s', e)
 
     def __create_retriever(self):
 

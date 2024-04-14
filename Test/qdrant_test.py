@@ -6,7 +6,7 @@ from langchain_community.document_loaders.directory import DirectoryLoader
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_text_splitters import CharacterTextSplitter, RecursiveCharacterTextSplitter
 # from qdrant_client import QdrantClient
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders.text import TextLoader
 from langchain_community.vectorstores.qdrant import Qdrant
 from qdrant_client import QdrantClient
 
@@ -79,8 +79,11 @@ def retrieve_data(collection_name):
         chat_history.append((query, result["answer"]))
         query = None
 
-retrieve_data(collection_name='10th-history-complete-book')
+# retrieve_data(collection_name='10th-history-complete-book')
 
-# create_index(collection_name="10th-history-complete-book", document=docs)
+docs = TextLoader('/home/akhil/PycharmProjects/customTrainGPT/data/test_file.txt').load()
+# docs = loader.load()
+
+create_index(collection_name="test_book", document=docs)
 
 

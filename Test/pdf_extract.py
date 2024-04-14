@@ -63,8 +63,8 @@ def extract_left_section_advanced(pdf_path):
 
 
 # Example usage (similar to previous example)
-(extract_left_section_advanced('/home/akhil/Downloads/history_X_ch1.pdf'))
-
+print(extract_left_section_advanced('/home/akhil/PycharmProjects/customTrainGPT/data/XI-biology-book/kebo102.pdf'))
+exit()
 
 def main():
     import os
